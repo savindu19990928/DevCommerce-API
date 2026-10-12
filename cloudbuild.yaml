@@ -1,0 +1,28 @@
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', '[GCP region]-docker.pkg.dev/[GCP project ID]/[Artifact Registry repository]/[service name]', 
+      '.'
+    ]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      '[GCP region]-docker.pkg.dev/[GCP project ID]/[Artifact Registry repository]/[service name]'
+    ]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      [
+        'run', 'deploy', '[service name]',
+        '--image', '[GCP region]-docker.pkg.dev/[GCP project ID]/[Artifact Registry repository]/[service name]',
+        '--region', '[GCP region]',
+        '--platform', 'managed',
+        '--allow-unauthenticated',
+        '--quiet'
+      ]
